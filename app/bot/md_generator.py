@@ -17,6 +17,14 @@ def make_filename(author, title):
         base += "..."
     return sanitize_filename(base)
 
+def format_tags(tags_str: str) -> str:
+    # Split by comma and strip whitespace
+    tags = [tag.strip() for tag in tags_str.split(',')]
+    # Replace spaces with underscores and add # prefix
+    formatted_tags = [f"#{tag.replace(' ', '_')}" for tag in tags]
+    # Join with spaces
+    return ' '.join(formatted_tags)
+
 def render_md(metadata: dict, with_priority: bool):
     config = load_config()
     output_folder = Path(config["output_folder"])
@@ -24,6 +32,12 @@ def render_md(metadata: dict, with_priority: bool):
     template_name = "template_with_priority.md" if with_priority else "template_without_priority.md"
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
     template = env.get_template(template_name)
+    
+    # Format tags before rendering
+    if 'tags' in metadata:
+        metadata = metadata.copy()  # Create a copy to avoid modifying the original
+        metadata['tags'] = format_tags(metadata['tags'])
+    
     content = template.render(**metadata)
     filename = make_filename(metadata["authors"].split(",")[0], metadata["title"])
     path = output_folder / f"{filename}.md"
