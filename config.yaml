@@ -1,0 +1,12 @@
+languages:
+  - code: en
+    priority: 1
+  - code: ru
+    priority: 2
+allowed_telegram_ids:
+  - 341629900
+output_folder: ./output
+api_keys:
+  openlibrary: ""
+  deepseek: ""
+  googlebooks: "" 
