@@ -10,7 +10,8 @@ import re
 import logging
 
 config = load_config()
-bot = Bot(token="7788378173:AAFrCh4KNmvqp3SW062lX4i_3cDiZFOt0Uk")
+tg_bot_token = config.get("telegram_bot_token")
+bot = Bot(token=tg_bot_token)
 dp = Dispatcher()
 
 user_search_results = {}
