@@ -3,6 +3,7 @@ languages:
     priority: 1
   - code: ru
     priority: 2
+telegram_bot_token: tgbot123
 allowed_telegram_ids:
   - 341629900
 output_folder: ./output
