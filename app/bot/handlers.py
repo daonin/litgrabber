@@ -9,7 +9,7 @@ from .md_generator import render_md
 import re
 import logging
 import datetime
-#test comment
+
 config = load_config()
 tg_bot_token = config.get("telegram_bot_token")
 bot = Bot(token=tg_bot_token)
