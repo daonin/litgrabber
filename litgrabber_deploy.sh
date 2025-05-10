@@ -7,11 +7,12 @@ IMAGE_NAME="litgrabber"
 CONTAINER_NAME="litgrabber"
 HOST_PATH="/trans500/backup/secondbrain/Inbox"
 CONTAINER_PATH="/app/output"
+PRODCONFIG_PATH="/users/daonin/code/prodconfig.yaml"
 
 if [ ! -d "$REPO_DIR" ]; then
     echo "🔄 Cloning fresh repository..."
     git clone "$REPO_URL" "$REPO_DIR"
-    cp prodconfig.yaml "$REPO_DIR/config.yaml"
+    cp "$PRODCONFIG_PATH" "$REPO_DIR/config.yaml"
     NEED_UPDATE=1
 else
     echo "🔄 Checking for updates in master branch..."
@@ -25,7 +26,7 @@ else
     else
         echo "⬆️ Updates found. Pulling latest changes..."
         git reset --hard origin/main
-        cp ../prodconfig.yaml ./config.yaml
+        cp "$PRODCONFIG_PATH" ./config.yaml
         NEED_UPDATE=1
     fi
     cd ..
