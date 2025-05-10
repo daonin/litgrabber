@@ -3,4 +3,4 @@ httpx
 PyYAML
 Jinja2
 python-dotenv
-wikipediaapi
+wikipedia-api
