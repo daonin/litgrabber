@@ -8,6 +8,7 @@ from .search import aggregate_search, search_openlibrary, search_deepseek, searc
 from .md_generator import render_md
 import re
 import logging
+import datetime
 
 config = load_config()
 tg_bot_token = config.get("telegram_bot_token")
@@ -15,6 +16,7 @@ bot = Bot(token=tg_bot_token)
 dp = Dispatcher()
 
 user_search_results = {}
+START_TIME = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 @dp.message(CommandStart())
 async def start(msg: Message):
@@ -135,6 +137,12 @@ async def more_results(msg: Message):
         msg_text += "Send 'more' to see next 5."
     await msg.answer(msg_text)
     user_search_results[msg.from_user.id+1000000] = offset+5
+
+@dp.message(lambda m: m.text.strip().lower() == '/version')
+async def version(msg: Message):
+    if not is_allowed(msg.from_user.id):
+        return
+    await msg.answer(f"Build/start time: {START_TIME}")
 
 async def main():
     logging.basicConfig(level=logging.INFO)
