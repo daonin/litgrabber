@@ -74,8 +74,9 @@ async def search_wikipedia_ru(query):
         "utf8": 1,
         "srlimit": 20,
     }
+    headers = {"User-Agent": "LitGrabberBot/1.0 (https://github.com/yourrepo; youremail@example.com)"}
     async with httpx.AsyncClient() as client:
-        r = await client.get(url, params=params)
+        r = await client.get(url, params=params, headers=headers)
         r.raise_for_status()
         items = r.json().get("query", {}).get("search", [])
         results = []
@@ -111,7 +112,7 @@ async def aggregate_search(query):
     return deduped
 
 async def get_wikipedia_book_metadata(title):
-    wiki = wikipediaapi.Wikipedia('ru')
+    wiki = wikipediaapi.Wikipedia('ru', user_agent='LitGrabberBot/1.0 (https://github.com/yourrepo; youremail@example.com)')
     page = wiki.page(title)
     if not page.exists():
         return {"summary": "", "wikipedia_url": "", "year": ""}

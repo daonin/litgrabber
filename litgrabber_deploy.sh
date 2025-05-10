@@ -17,14 +17,14 @@ else
     echo "🔄 Checking for updates in master branch..."
     cd "$REPO_DIR"
     git fetch origin
-    LOCAL_HASH=$(git rev-parse master)
-    REMOTE_HASH=$(git rev-parse origin/master)
+    LOCAL_HASH=$(git rev-parse main)
+    REMOTE_HASH=$(git rev-parse origin/main)
     if [ "$LOCAL_HASH" = "$REMOTE_HASH" ]; then
         echo "✅ No updates in master. Exiting."
         exit 0
     else
         echo "⬆️ Updates found. Pulling latest changes..."
-        git reset --hard origin/master
+        git reset --hard origin/main
         cp ../prodconfig.yaml ./config.yaml
         NEED_UPDATE=1
     fi
