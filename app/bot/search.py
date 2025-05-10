@@ -61,6 +61,36 @@ async def search_googlebooks(query):
             })
         return results
 
+async def search_wikipedia_ru(query):
+    # Поиск по русской Википедии через API
+    url = "https://ru.wikipedia.org/w/api.php"
+    params = {
+        "action": "query",
+        "list": "search",
+        "srsearch": query,
+        "format": "json",
+        "utf8": 1,
+        "srlimit": 20,
+    }
+    async with httpx.AsyncClient() as client:
+        r = await client.get(url, params=params)
+        r.raise_for_status()
+        items = r.json().get("query", {}).get("search", [])
+        results = []
+        for item in items:
+            title = item.get("title", "")
+            # В Википедии нет авторов, переводчиков, ISBN и года публикации в API поиска
+            results.append({
+                "title": title,
+                "authors": "Wikipedia contributors",
+                "year": "",
+                "translator": "",
+                "translation_year": "",
+                "isbn_doi": "",
+                "lang": "ru",
+            })
+        return results
+
 async def aggregate_search(query):
     ol, ds, gb = await asyncio.gather(
         search_openlibrary(query),

@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from .config import load_config
 from .access_control import is_allowed
-from .search import aggregate_search
+from .search import aggregate_search, search_openlibrary, search_deepseek, search_googlebooks, search_wikipedia_ru
 from .md_generator import render_md
 import re
 import logging
@@ -60,7 +60,24 @@ async def handle_message(msg: Message):
         return
     # Otherwise, treat as search
     await msg.answer("Searching...")
-    results = await aggregate_search(text)
+    # --- BEGIN: explicit source search support ---
+    if ">" in text:
+        prefix, real_query = text.split("<", 1)[0].split(">", 1)
+        prefix = prefix.strip().lower()
+        real_query = real_query.strip()
+        if prefix == "google":
+            results = await search_googlebooks(real_query)
+        elif prefix == "openlib":
+            results = await search_openlibrary(real_query)
+        elif prefix == "deepseek":
+            results = await search_deepseek(real_query)
+        elif prefix == "wiki":
+            results = await search_wikipedia_ru(real_query)
+        else:
+            results = await aggregate_search(text)
+    else:
+        results = await aggregate_search(text)
+    # --- END: explicit source search support ---
     user_search_results[msg.from_user.id] = results
     if not results:
         await msg.answer("No results found.")

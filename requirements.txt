@@ -2,4 +2,4 @@ aiogram
 httpx
 PyYAML
 Jinja2
-python-dotenv 
+python-dotenv
