@@ -1,6 +1,6 @@
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from .config import load_config
 from .access_control import is_allowed
@@ -138,7 +138,7 @@ async def more_results(msg: Message):
     await msg.answer(msg_text)
     user_search_results[msg.from_user.id+1000000] = offset+5
 
-@dp.message(lambda m: m.text.strip().lower() == '/version')
+@dp.message(Command("version"))
 async def version(msg: Message):
     if not is_allowed(msg.from_user.id):
         return
