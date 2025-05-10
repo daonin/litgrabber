@@ -1,6 +1,8 @@
 import httpx
 import asyncio
 from .config import load_config
+import re
+import wikipediaapi
 
 async def search_openlibrary(query):
     url = "https://openlibrary.org/search.json"
@@ -106,4 +108,19 @@ async def aggregate_search(query):
         if key not in seen:
             seen.add(key)
             deduped.append(r)
-    return deduped 
+    return deduped
+
+async def get_wikipedia_book_metadata(title):
+    wiki = wikipediaapi.Wikipedia('ru')
+    page = wiki.page(title)
+    if not page.exists():
+        return {"summary": "", "wikipedia_url": "", "year": ""}
+    summary = page.summary
+    fullurl = page.fullurl
+    year_match = re.search(r"(1[89][0-9]{2}|20[0-2][0-9])", summary)
+    year = year_match.group(0) if year_match else ""
+    return {
+        "summary": summary,
+        "wikipedia_url": fullurl,
+        "year": year,
+    } 

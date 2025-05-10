@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from .config import load_config
 from .access_control import is_allowed
-from .search import aggregate_search, search_openlibrary, search_deepseek, search_googlebooks, search_wikipedia_ru
+from .search import aggregate_search, search_openlibrary, search_deepseek, search_googlebooks, search_wikipedia_ru, get_wikipedia_book_metadata
 from .md_generator import render_md
 import re
 import logging
@@ -38,6 +38,14 @@ async def handle_message(msg: Message):
             item = results[idx]
             item["tags"] = tags
             item["priority"] = priority
+            # --- enrich with Wikipedia metadata if needed ---
+            if item.get("lang") == "ru" and item.get("authors") == "Wikipedia contributors":
+                meta = await get_wikipedia_book_metadata(item["title"])
+                item["summary"] = meta.get("summary", "")
+                item["wikipedia_url"] = meta.get("wikipedia_url", "")
+                if meta.get("year"):
+                    item["year"] = meta["year"]
+            # --- end enrich ---
             path = render_md(item, with_priority=True)
             await msg.answer(f"Saved to {path}")
         else:
@@ -53,6 +61,14 @@ async def handle_message(msg: Message):
             item = results[idx]
             item["tags"] = tags
             item["priority"] = ""
+            # --- enrich with Wikipedia metadata if needed ---
+            if item.get("lang") == "ru" and item.get("authors") == "Wikipedia contributors":
+                meta = await get_wikipedia_book_metadata(item["title"])
+                item["summary"] = meta.get("summary", "")
+                item["wikipedia_url"] = meta.get("wikipedia_url", "")
+                if meta.get("year"):
+                    item["year"] = meta["year"]
+            # --- end enrich ---
             path = render_md(item, with_priority=False)
             await msg.answer(f"Saved to {path}")
         else:
