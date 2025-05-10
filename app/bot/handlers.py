@@ -24,6 +24,12 @@ async def start(msg: Message):
         return
     await msg.answer("Send metadata: title, author, year, DOI, ISBN")
 
+@dp.message(Command("version"))
+async def version(msg: Message):
+    if not is_allowed(msg.from_user.id):
+        return
+    await msg.answer(f"Build/start time: {START_TIME}")
+    
 @dp.message()
 async def handle_message(msg: Message):
     if not is_allowed(msg.from_user.id):
@@ -137,12 +143,6 @@ async def more_results(msg: Message):
         msg_text += "Send 'more' to see next 5."
     await msg.answer(msg_text)
     user_search_results[msg.from_user.id+1000000] = offset+5
-
-@dp.message(Command("version"))
-async def version(msg: Message):
-    if not is_allowed(msg.from_user.id):
-        return
-    await msg.answer(f"Build/start time: {START_TIME}")
 
 async def main():
     logging.basicConfig(level=logging.INFO)
