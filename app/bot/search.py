@@ -124,4 +124,116 @@ async def get_wikipedia_book_metadata(title):
         "summary": summary,
         "wikipedia_url": fullurl,
         "year": year,
-    } 
+    }
+
+async def get_wikidata_book_metadata(title):
+    url_search = "https://www.wikidata.org/w/api.php"
+    params_search = {
+        "action": "wbsearchentities",
+        "search": title,
+        "language": "ru",
+        "format": "json",
+        "type": "item",
+        "limit": 1,
+    }
+    async with httpx.AsyncClient() as client:
+        r = await client.get(url_search, params=params_search)
+        r.raise_for_status()
+        search_results = r.json().get("search", [])
+        if not search_results:
+            return {
+                "title": title,
+                "authors": "",
+                "year": "",
+                "translator": "",
+                "isbn_doi": "",
+                "lang": "",
+                "translations": [],
+                "wikidata_url": "",
+            }
+        entity_id = search_results[0]["id"]
+        params_entity = {
+            "action": "wbgetentities",
+            "ids": entity_id,
+            "format": "json",
+            "props": "claims|labels|sitelinks",
+            "languages": "ru|en",
+        }
+        r2 = await client.get(url_search, params=params_entity)
+        r2.raise_for_status()
+        entity = r2.json()["entities"][entity_id]
+        claims = entity.get("claims", {})
+        def get_claim(prop):
+            vals = claims.get(prop, [])
+            if not vals:
+                return ""
+            mainsnak = vals[0].get("mainsnak", {})
+            datavalue = mainsnak.get("datavalue", {})
+            value = datavalue.get("value", "")
+            if isinstance(value, dict) and "id" in value:
+                return value["id"]
+            if isinstance(value, dict) and "time" in value:
+                return value["time"][1:5]  # +1 чтобы убрать знак
+            return value
+        # Автор
+        author_id = get_claim("P50")
+        author = ""
+        if author_id:
+            params_author = {
+                "action": "wbgetentities",
+                "ids": author_id,
+                "format": "json",
+                "props": "labels",
+                "languages": "ru|en",
+            }
+            r3 = await client.get(url_search, params=params_author)
+            r3.raise_for_status()
+            labels = r3.json()["entities"][author_id]["labels"]
+            author = labels.get("ru", {}).get("value") or labels.get("en", {}).get("value", "")
+        # Год публикации
+        year = get_claim("P577")
+        # Переводчик
+        translator_id = get_claim("P655")
+        translator = ""
+        if translator_id:
+            params_trans = {
+                "action": "wbgetentities",
+                "ids": translator_id,
+                "format": "json",
+                "props": "labels",
+                "languages": "ru|en",
+            }
+            r4 = await client.get(url_search, params=params_trans)
+            r4.raise_for_status()
+            labels = r4.json()["entities"][translator_id]["labels"]
+            translator = labels.get("ru", {}).get("value") or labels.get("en", {}).get("value", "")
+        # ISBN
+        isbn = get_claim("P212") or get_claim("P957")
+        # Язык
+        lang_id = get_claim("P407")
+        lang = ""
+        if lang_id:
+            params_lang = {
+                "action": "wbgetentities",
+                "ids": lang_id,
+                "format": "json",
+                "props": "labels",
+                "languages": "ru|en",
+            }
+            r5 = await client.get(url_search, params=params_lang)
+            r5.raise_for_status()
+            labels = r5.json()["entities"][lang_id]["labels"]
+            lang = labels.get("ru", {}).get("value") or labels.get("en", {}).get("value", "")
+        # Ссылки на переводы (sitelinks)
+        sitelinks = entity.get("sitelinks", {})
+        translations = [k for k in sitelinks.keys() if k.endswith("wiki")]
+        return {
+            "title": entity.get("labels", {}).get("ru", {}).get("value", title),
+            "authors": author,
+            "year": year,
+            "translator": translator,
+            "isbn_doi": isbn,
+            "lang": lang,
+            "translations": translations,
+            "wikidata_url": f"https://www.wikidata.org/wiki/{entity_id}",
+        } 

@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from .config import load_config
 from .access_control import is_allowed
-from .search import aggregate_search, search_openlibrary, search_deepseek, search_googlebooks, search_wikipedia_ru, get_wikipedia_book_metadata
+from .search import aggregate_search, search_openlibrary, search_deepseek, search_googlebooks, search_wikipedia_ru, get_wikidata_book_metadata
 from .md_generator import render_md
 import re
 import logging
@@ -40,11 +40,13 @@ async def handle_message(msg: Message):
             item["priority"] = priority
             # --- enrich with Wikipedia metadata if needed ---
             if item.get("lang") == "ru" and item.get("authors") == "Wikipedia contributors":
-                meta = await get_wikipedia_book_metadata(item["title"])
-                item["summary"] = meta.get("summary", "")
-                item["wikipedia_url"] = meta.get("wikipedia_url", "")
-                if meta.get("year"):
-                    item["year"] = meta["year"]
+                meta = await get_wikidata_book_metadata(item["title"])
+                if meta.get("authors"): item["authors"] = meta["authors"]
+                if meta.get("year"): item["year"] = meta["year"]
+                if meta.get("translator"): item["translator"] = meta["translator"]
+                if meta.get("isbn_doi"): item["isbn_doi"] = meta["isbn_doi"]
+                if meta.get("lang"): item["lang"] = meta["lang"]
+                if meta.get("wikidata_url"): item["wikidata_url"] = meta["wikidata_url"]
             # --- end enrich ---
             path = render_md(item, with_priority=True)
             await msg.answer(f"Saved to {path}")
@@ -63,11 +65,13 @@ async def handle_message(msg: Message):
             item["priority"] = ""
             # --- enrich with Wikipedia metadata if needed ---
             if item.get("lang") == "ru" and item.get("authors") == "Wikipedia contributors":
-                meta = await get_wikipedia_book_metadata(item["title"])
-                item["summary"] = meta.get("summary", "")
-                item["wikipedia_url"] = meta.get("wikipedia_url", "")
-                if meta.get("year"):
-                    item["year"] = meta["year"]
+                meta = await get_wikidata_book_metadata(item["title"])
+                if meta.get("authors"): item["authors"] = meta["authors"]
+                if meta.get("year"): item["year"] = meta["year"]
+                if meta.get("translator"): item["translator"] = meta["translator"]
+                if meta.get("isbn_doi"): item["isbn_doi"] = meta["isbn_doi"]
+                if meta.get("lang"): item["lang"] = meta["lang"]
+                if meta.get("wikidata_url"): item["wikidata_url"] = meta["wikidata_url"]
             # --- end enrich ---
             path = render_md(item, with_priority=False)
             await msg.answer(f"Saved to {path}")
