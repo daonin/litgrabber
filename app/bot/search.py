@@ -112,7 +112,7 @@ async def aggregate_search(query):
     return deduped
 
 async def get_wikipedia_book_metadata(title):
-    wiki = wikipediaapi.Wikipedia('ru', user_agent='LitGrabberBot/1.0 (https://github.com/yourrepo; youremail@example.com)')
+    wiki = wikipediaapi.Wikipedia('LitGrabberBot/1.0 (https://github.com/yourrepo; youremail@example.com)', 'ru')
     page = wiki.page(title)
     if not page.exists():
         return {"summary": "", "wikipedia_url": "", "year": ""}
