@@ -28,8 +28,8 @@ async def start(msg: Message):
 async def version(msg: Message):
     if not is_allowed(msg.from_user.id):
         return
-    await msg.answer(f"Build/start time: {START_TIME}")
-    
+    await msg.answer(f"Build/start time: {START_TIME} UTC")
+
 @dp.message()
 async def handle_message(msg: Message):
     if not is_allowed(msg.from_user.id):
